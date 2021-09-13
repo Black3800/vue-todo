@@ -2,6 +2,9 @@ const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000
 const uri = process.env.MONGODB_URI || 'mongodb://52.163.89.103:27017/test'
+const server = require('http').createServer(app)
+const WebSocketServer = require('websocket').server
+const ws = new WebSocketServer({ httpServer: server })
 
 app.use(express.json())
 
@@ -80,5 +83,31 @@ app.put('/todos/:id', function (req, res) {
 
 app.use(express.static('./public'))
 
+function originIsAllowed(origin) {
+    return origin.indexOf('anakint.com') !== -1
+}
+
+let clients = []
+
+ws.on('request', function (request) {
+    console.log('new client connect to ws')
+    if (!originIsAllowed(request.origin))
+    {
+        console.log('Forbidden origin ' + request.origin + ' tried to connect to ws')
+        return
+    }
+    let conn = request.accept(null, request.origin)
+    clients.push(conn)
+    
+    conn.on('message', (msg) => {
+        console.log('broadcasting update to clients')
+        for (const c of clients)
+        {
+            c.sendUTF('u')
+        }
+    })
+})
+
 console.log('app is running at port ' + port)
-app.listen(port)
+server.listen(port)
+

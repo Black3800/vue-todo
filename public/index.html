@@ -435,7 +435,10 @@
                     .then(response => response.json())
                     .then(data => {
                         app.todos = data
-                        document.getElementById('spinner').remove()
+                        if(document.getElementById('spinner') !== null)
+                        {
+                            document.getElementById('spinner').remove()
+                        }
                     })
             }
 
@@ -448,6 +451,7 @@
                         'Content-Type': 'application/json'
                     }
                 })
+                ws.send('u')
             }
 
             function updateTodo(id, value)
@@ -460,6 +464,7 @@
                     },
                     body: JSON.stringify({completed: value})
                 })
+                ws.send('u')
             }
 
             function addTodo(item)
@@ -472,7 +477,14 @@
                     },
                     body: JSON.stringify({ text: item.text, completed: item.completed })
                 })
+                ws.send('u')
             }
+
+            let ws = new WebSocket('ws://localhost:3000')
+
+            ws.addEventListener('message', () => {
+                fetchTodo()
+            })
 
             fetchTodo()
             document.getElementById('todo-input').focus()
