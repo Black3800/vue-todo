@@ -2,7 +2,7 @@ const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000
 const uri = process.env.MONGODB_URI || 'mongodb://52.163.89.103:27017/test'
-const server = require('http').createServer(app)
+const server = require('https').createServer(app)
 const WebSocketServer = require('websocket').server
 const ws = new WebSocketServer({ httpServer: server })
 
