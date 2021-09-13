@@ -186,7 +186,7 @@
 
             li.inserted
             {
-                animation: insert 0.2s;
+                animation: insert 0.2s forwards;
             }
 
             @keyframes insert
@@ -335,7 +335,8 @@
                         /**
                          * Click state of #todo-submit button
                          */
-                        clicked: false
+                        clicked: false,
+                        random: 0
                     },
                     methods: {
                         addItem: function (event) {
@@ -350,12 +351,12 @@
                             /**
                              * Find max id in this.todos
                              */
-                            let maxId = Math.max.apply(Math, this.todos.map( (o) => o.id ))
                             let value = document.getElementById('todo-input').value
                             if(value.trim() !== '')
                             {
+                                this.random = Math.floor(Math.random() * 1000000 + 1)
                                 let newItem = {
-                                    id: maxId === -Infinity ? 0  : maxId + 1,
+                                    id: this.random,
                                     text: value.substring(0, 151),
                                     completed: false,
                                     isNew: true
@@ -363,16 +364,26 @@
                                 /**
                                  * Add the item at top
                                  */
-                                this.todos = [newItem, ...this.todos]
+                                this.todos = [newItem, ...app.todos]
                                 document.getElementById('todo-input').value = ''
                                 /**
                                  * Remove insert animation when finish
                                  */
-                                addTodo(newItem)
-                                setTimeout(() => {
+                                setTimeout(() =>
+                                {
                                     delete this.todos[0].isNew
-                                    // localStorage.setItem('todos', JSON.stringify(this.todos))
+                                    console.log('rem animation')
                                 }, 200)
+                                fetch('/todos/max')
+                                    .then(response => response.json())
+                                    .then((data) => {
+                                        let maxId = data[0].id
+                                        console.log('max = ' + maxId)
+                                        let index = this.todos.indexOf(newItem)
+                                        newItem = {...newItem, id: maxId + 1}
+                                        // this.todos[index].id = newItem.id
+                                        addTodo(newItem)
+                                    })
                             }
                         },
                         /**
@@ -414,7 +425,6 @@
                             }
                             this.todos = todos
                             updateTodo(item.id, item.completed)
-                            // localStorage.setItem('todos', JSON.stringify(this.todos))
                         },
                         removeItem: function (item, event) {
                             event.stopPropagation()
@@ -423,7 +433,6 @@
                             item.id = null
                             setTimeout(() => {
                                 this.todos.splice(this.todos.indexOf(item), 1)
-                                // localStorage.setItem('todos', JSON.stringify(this.todos))
                             }, 300)
                         }
                     }
@@ -451,7 +460,6 @@
                         'Content-Type': 'application/json'
                     }
                 })
-                ws.send('u')
             }
 
             function updateTodo(id, value)
@@ -464,7 +472,6 @@
                     },
                     body: JSON.stringify({completed: value})
                 })
-                ws.send('u')
             }
 
             function addTodo(item)
@@ -475,15 +482,37 @@
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ text: item.text, completed: item.completed })
+                    body: JSON.stringify({ text: item.text, completed: item.completed, random: app.$data.random })
                 })
-                ws.send('u')
             }
 
             let ws = new WebSocket('wss://todo.anakint.com')
+            // let ws = new WebSocket('ws://localhost:3000')
+            let socket_listen = true
+            let socket_listen_timeout = 0
 
-            ws.addEventListener('message', () => {
-                fetchTodo()
+            ws.addEventListener('message', (msg) => {
+                if(!socket_listen)
+                {
+                    console.info('dropped ' + msg.data)
+                    return
+                }
+                // console.log(`(${app.$data.random}) random checked`)
+                console.log(msg.data)
+                if(msg.data === 'u' || msg.data != app.$data.random)
+                {
+                    fetchTodo()
+                }
+                else
+                {
+                    // console.log(`(${app.$data.random}) random matched, reject message for 300ms`)
+                    // clearTimeout(socket_listen_timeout)
+                    // socket_listen = false
+                    // socket_listen_timeout = setTimeout(() => {
+                    //     socket_listen = true
+                    //     fetchTodo()
+                    // }, 1000);
+                }
             })
 
             fetchTodo()
