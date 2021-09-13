@@ -7,7 +7,7 @@ app.use(express.json())
 
 app.get('/todos', function (req, res) {
     let MongoClient = require('mongodb').MongoClient
-    MongoClient.connect('mongodb://52.163.89.103:27017/test', function (err, db) {
+    MongoClient.connect(uri, function (err, db) {
         if (err) throw err
         let dbo = db.db('test')
         dbo.collection('todos').find().sort({completed: 1, id: -1}).toArray(function (err, result) {
@@ -20,7 +20,7 @@ app.get('/todos', function (req, res) {
 
 app.post('/todos/:id', function (req, res) {
     let MongoClient = require('mongodb').MongoClient
-    MongoClient.connect('mongodb://52.163.89.103:27017/test', function (err, db) {
+    MongoClient.connect(uri, function (err, db) {
         if (err) throw err
         let dbo = db.db('test')
         dbo.collection('todos').updateOne(
@@ -42,7 +42,7 @@ app.post('/todos/:id', function (req, res) {
 
 app.delete('/todos/:id', function (req, res) {
     let MongoClient = require('mongodb').MongoClient
-    MongoClient.connect('mongodb://52.163.89.103:27017/test', function (err, db) {
+    MongoClient.connect(uri, function (err, db) {
         if (err) throw err
         let dbo = db.db('test')
         dbo.collection('todos').deleteOne(
@@ -59,7 +59,7 @@ app.delete('/todos/:id', function (req, res) {
 
 app.put('/todos/:id', function (req, res) {
     let MongoClient = require('mongodb').MongoClient
-    MongoClient.connect('mongodb://52.163.89.103:27017/test', function (err, db) {
+    MongoClient.connect(uri, function (err, db) {
         if (err) throw err
         let dbo = db.db('test')
         dbo.collection('todos').insertOne(
