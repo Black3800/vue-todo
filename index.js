@@ -2,7 +2,7 @@ const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000
 const uri = process.env.MONGODB_URI || 'mongodb://52.163.89.103:27017/test'
-const server = require('https').createServer(app)
+const server = require('http').createServer(app)
 const WebSocketServer = require('websocket').server
 const ws = new WebSocketServer({ httpServer: server })
 
@@ -109,5 +109,9 @@ ws.on('request', function (request) {
 })
 
 console.log('app is running at port ' + port)
-server.listen(port)
+let s = server.listen(port)
+s.on('clientError', (err, socket) => {
+    console.error(err)
+    socket.end('HTTP/1.1 400 Bad Request\r\n\r\n')
+})
 
