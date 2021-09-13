@@ -480,7 +480,7 @@
                 ws.send('u')
             }
 
-            let ws = new WebSocket('ws://localhost:3000')
+            let ws = new WebSocket('ws://localhost')
 
             ws.addEventListener('message', () => {
                 fetchTodo()
