@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js && node public/getTodos.js",
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Anakin",
@@ -12,5 +12,8 @@
   "dependencies": {
     "express": "^4.17.1",
     "mongodb": "^4.1.1"
+  },
+  "engines": {
+    "node": "14.16"
   }
 }
