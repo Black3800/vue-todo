@@ -1,5 +1,6 @@
 const express = require('express')
 const app = express()
+const port = 3000
 
 app.use(express.json())
 
@@ -78,5 +79,5 @@ app.put('/todos/:id', function (req, res) {
 
 app.use(express.static('./public'))
 
-console.log('app is running at localhost:80')
-app.listen(80)
+console.log('app is running at port ' + port)
+app.listen(port)
