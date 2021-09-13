@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>My easy Vue todo-list</title>
+        <meta name="viewport" description="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+            integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"
+            integrity="sha512-Tn2m0TIpgVyTzzvmxLNuqbSJH3JP8jm+Cy3hvHrW7ndTDcJ1w5mBiksqDBb8GpE2ksktFvDB/ykZ0mDpsZj20w=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/smooth-scrollbar/8.6.3/smooth-scrollbar.min.js"
+            integrity="sha512-SeDDKCN2Ah/xzvwXOVCJtjjxigg/EOfcqGfmmnF5k0BBxMnFjDZciodIspnFbvQuMuL45nmhLmYEcZV4CpOw1A=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <style>
+            body
+            {
+                font-family: 'Segoe UI', 'SF Thonburi';
+                width: 100vw;
+                height: 100vh;
+                margin: 0px;
+                padding: 0px;
+            }
+
+            ::-moz-selection
+            { /* Code for Firefox */
+                color: #fff;
+                background: #FBAB7E;
+            }
+
+            ::selection
+            {
+                color: #fff;
+                background: #FBAB7E;
+            }
+
+            #app
+            {
+                width: 100%;
+                height: 100%;
+                display: flex;
+                flex-flow: column nowrap;
+                justify-content: center;
+                align-items: center;
+                background-color: #FBAB7E;
+                background-image: linear-gradient(62deg, #FBAB7E 0%, #F7CE68 100%);
+            }
+
+            h1
+            {
+                color: #fff;
+                text-shadow: 0px 1px 4px hsla(43, 90%, 20%, 0.5);
+            }
+
+            input
+            {
+                font-family: 'Segoe UI', 'SF Thonburi';
+                border: none;
+                border-radius: 5px;
+            }
+
+            input#todo-input
+            {
+                width: 300px;
+                height: 50px;
+                padding: 10px;
+                border: 1px solid transparent;
+                box-sizing: border-box;
+                cursor: text;
+                outline: none;
+            }
+
+            input#todo-input:focus
+            {
+                border-color: #68B0AB;
+                box-shadow: 0px 0px 3px 1px rgba(104, 176, 171, 0.5);
+            }
+
+            input#todo-submit
+            {
+                position: relative;
+                width: 100px;
+                height: 50px;
+                cursor: pointer;
+                background-color: #68B0AB;
+                color: #fff;
+                font-weight: bold;
+                text-shadow: 1px 1px 4px hsl(176deg 31% 20% / 70%);
+                transition: background-color 0.1s;
+                border: 2px solid transparent;
+                box-sizing: border-box;
+                outline: none;
+            }
+
+            input#todo-submit:hover, input#todo-submit:active
+            {
+                background-color: #7ebeba;
+            }
+
+            input#todo-submit:focus
+            {
+                border-color: #b5d8d6;
+            }
+
+            input#todo-submit.clicked
+            {
+                animation: click 0.1s;
+            }
+
+            @keyframes click
+            {
+                0%
+                {
+                    transform: scale(1.0);
+                    background-color: #68B0AB;
+                }
+                50%
+                {
+                    transform: scale(1.15);
+                    background-color: #7ebeba;
+                }
+                100%
+                {
+                    transform: scale(1.0);
+                    background-color: #68B0AB;
+                }
+            }
+
+            #items
+            {
+                margin-top: 20px;
+                min-height: 30vh;
+                max-height: 60vh;
+                overflow: auto;
+                padding: 30px;
+            }
+
+            #spinner
+            {
+                width: 60px;
+                height: 60px;
+                color: #fff;
+                font-size: large;
+            }
+
+            @keyframes spin
+            {
+                to {
+                    transform: rotateZ(360deg);
+                }
+            }
+
+            #items ul
+            {
+                padding: 5px;
+            }
+
+            li
+            {
+                display: flex;
+                flex-flow: row nowrap;
+                justify-content: space-around;
+                align-items: center;
+                position: relative;
+                width: 350px;
+                left: 0px;
+                height: auto;
+                min-height: 50px;
+                max-height: 120px;
+                overflow: hidden;
+                list-style-type: none;
+                background-color: #fff;
+                border: 1px solid #ddd;
+                margin: 10px;
+                border-radius: 5px;
+                transition: box-shadow 0.1s, border-color 0.2s;
+                transform-origin: top left;
+            }
+
+            li:hover
+            {
+                box-shadow: 1px 1px 6px rgba(0, 0, 0, 0.2);
+                border-color: #ccc;
+            }
+
+            li.inserted
+            {
+                animation: insert 0.2s;
+            }
+
+            @keyframes insert
+            {
+                from
+                {
+                    transform: rotate(-5deg);
+                    left: -50px;
+                    opacity: 0;
+                }
+                to
+                {
+                    transform: rotate(0deg);
+                    left: 0px;
+                    opacity: 1;
+                }
+            }
+
+            li.removed
+            {
+                animation: remove 0.3s;
+            }
+
+            @keyframes remove
+            {
+                to
+                {
+                    transform: rotate(10deg);
+                    left: -50px;
+                    opacity: 0;
+                }
+            }
+
+            li.completed
+            {
+                opacity: 0.5;
+            }
+
+            li.completed > div
+            {
+                text-decoration: line-through;
+            }
+
+            li > div
+            {
+                display: flex;
+                justify-content: flex-start;
+                align-items: center;
+                width: 270px;
+                height: 100%;
+                overflow-y: auto;
+                padding: 5px;
+                word-break: break-all;
+                word-wrap: break-word;
+            }
+
+            li > .complete-btn
+            {
+                width: 40px;
+                height: 40px;
+                background-color: transparent;
+                color: #888;
+                border: 1px solid rgba(0, 0, 0, 0);
+                border-radius: 5px;
+                cursor: pointer;
+                margin:5px;
+                transition: background-color 0.2s;
+            }
+
+            li > .complete-btn:hover
+            {
+                color: #68B0AB;
+                border-color: #68B0AB;
+                background-color: rgba(104, 176, 171, 0.1);
+            }
+
+            li.completed > .complete-btn
+            {
+                color: #68B0AB;
+                border-color: #68B0AB;
+            }
+
+            li > .delete-btn
+            {
+                width: 40px;
+                height: 40px;
+                background-color: transparent;
+                color: #888;
+                border: 1px solid rgba(0, 0, 0, 0);
+                border-radius: 5px;
+                cursor: pointer;
+                margin:5px;
+                transition: background-color 0.2s;
+            }
+
+            li > .delete-btn:hover
+            {
+                color: #FBAB7E;
+                border-color: #FBAB7E;
+                background-color: rgba(247, 207, 104, 0.1);
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <h1>My easy Vue todo-list</h1>
+            <form v-on:submit="addItem">
+                <input type="text" id="todo-input" placeholder="Ex: Learn Vue.js" maxlength="128"/>
+                <input type="submit" id="todo-submit" value="Add an item!" v-bind:class="{ 'clicked': clicked }" />
+            </form>
+            <div id="items">
+                <div id="spinner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <ul>
+                    <li v-for="todo in todos"
+                        v-bind:class="{
+                            'inserted': todo.isNew,
+                            'completed': todo.completed,
+                            'removed': todo.id === null
+                            }"
+                        :key="todo.id"
+                        :ref="'todo' + todo.id"
+                    >
+                        <button class="complete-btn" v-on:click="e => toggleComplete(todo, e)">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <div :ref="'todo-txt' + todo.id">
+                            {{ todo.text }}
+                        </div>
+                        <button class="delete-btn" v-on:click="e => removeItem(todo, e)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <script>
+            let app = new Vue({
+                    el: '#app',
+                    data: {
+                        /**
+                         * Array of todo items from localStorage
+                         */
+                        todos: [],
+                        /**
+                         * Click state of #todo-submit button
+                         */
+                        clicked: false
+                    },
+                    methods: {
+                        addItem: function (event) {
+                            event.preventDefault()
+                            /**
+                             * Play button animation
+                             */
+                            this.clicked = true
+                            setTimeout(() => {
+                                this.clicked = false;
+                            }, 300)
+                            /**
+                             * Find max id in this.todos
+                             */
+                            let maxId = Math.max.apply(Math, this.todos.map( (o) => o.id ))
+                            let value = document.getElementById('todo-input').value
+                            if(value.trim() !== '')
+                            {
+                                let newItem = {
+                                    id: maxId === -Infinity ? 0  : maxId + 1,
+                                    text: value.substring(0, 151),
+                                    completed: false,
+                                    isNew: true
+                                }
+                                /**
+                                 * Add the item at top
+                                 */
+                                this.todos = [newItem, ...this.todos]
+                                document.getElementById('todo-input').value = ''
+                                /**
+                                 * Remove insert animation when finish
+                                 */
+                                addTodo(newItem)
+                                setTimeout(() => {
+                                    delete this.todos[0].isNew
+                                    // localStorage.setItem('todos', JSON.stringify(this.todos))
+                                }, 200)
+                            }
+                        },
+                        /**
+                         * Toggle completed state of the item
+                         */
+                        toggleComplete: function (item, event) {
+                            event.stopPropagation()
+                            /**
+                             * Do nothing if it is in the process of deleting
+                             */
+                            if (item.id === null) return
+                            /**
+                             * Deep copy this.todos array
+                             */
+                            let todos = this.todos.slice()
+                            item.completed = !item.completed
+                            if(item.completed)
+                            {
+                                /**
+                                 * If the item is completed, move to bottom
+                                 */
+                                todos.splice(this.todos.indexOf(item), 1)
+                                todos.push(item)
+                            }
+                            else
+                            {
+                                /**
+                                 * If the item is not completed, move to original place
+                                 */
+                                let index = this.todos.indexOf(item)
+                                todos.splice(this.todos.indexOf(item), 1)
+                                let iterator = 0
+                                for(const t of todos)
+                                {
+                                    if(t.id < item.id) break
+                                    iterator++
+                                }
+                                todos.splice(iterator, 0, item)
+                            }
+                            this.todos = todos
+                            updateTodo(item.id, item.completed)
+                            // localStorage.setItem('todos', JSON.stringify(this.todos))
+                        },
+                        removeItem: function (item, event) {
+                            event.stopPropagation()
+                            this.$refs['todo' + item.id][0].style.transformOrigin = 'top right'
+                            deleteTodo(item.id)
+                            item.id = null
+                            setTimeout(() => {
+                                this.todos.splice(this.todos.indexOf(item), 1)
+                                // localStorage.setItem('todos', JSON.stringify(this.todos))
+                            }, 300)
+                        }
+                    }
+                })
+            
+            function fetchTodo()
+            {
+                fetch('/todos')
+                    .then(response => response.json())
+                    .then(data => {
+                        app.todos = data
+                        document.getElementById('spinner').remove()
+                    })
+            }
+
+            function deleteTodo(id)
+            {
+                fetch('/todos/' + id, {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                })
+            }
+
+            function updateTodo(id, value)
+            {
+                fetch('/todos/' + id, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({completed: value})
+                })
+            }
+
+            function addTodo(item)
+            {
+                fetch('/todos/' + item.id, {
+                    method: 'PUT',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text: item.text, completed: item.completed })
+                })
+            }
+
+            fetchTodo()
+            document.getElementById('todo-input').focus()
+        </script>
+        <script>
+            let Scrollbar = window.Scrollbar;
+            Scrollbar.init(document.getElementById('items'))
+        </script>
+    </body>
+</html>
