@@ -1,7 +1,7 @@
 const express = require('express')
 const app = express()
-const port = process.env.PORT || 3000
-const uri = process.env.MONGODB_URI || 'mongodb://52.163.89.103:27017/test'
+const port = process.env.PORT
+const uri = process.env.MONGODB_URI
 const server = require('http').createServer(app)
 const WebSocketServer = require('websocket').server
 const ws = new WebSocketServer({ httpServer: server })
@@ -124,11 +124,11 @@ let clients = []
 
 ws.on('request', function (request) {
     console.log('new client connect to ws')
-    // if (!originIsAllowed(request.origin))
-    // {
-    //     console.log('Forbidden origin ' + request.origin + ' tried to connect to ws')
-    //     return
-    // }
+    if (!originIsAllowed(request.origin))
+    {
+        console.log('Forbidden origin ' + request.origin + ' tried to connect to ws')
+        return
+    }
     let conn = request.accept(null, request.origin)
     clients.push(conn)
     conn.on('close', () => {
