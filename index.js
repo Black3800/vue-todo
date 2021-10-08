@@ -117,7 +117,8 @@ function emit(msg)
 
 function originIsAllowed(origin)
 {
-    return origin.indexOf('anakint.com') !== -1
+    const regex = /^([\w]+\.)*anakint\.com$/gm
+    return regex.test(origin)
 }
 
 let clients = []
