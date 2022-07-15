@@ -1,0 +1,16 @@
+services:
+  app:
+    image: anakint/vue-todo
+    ports:
+      - 80:80
+    environment:
+      PORT: 80
+      MONGODB_URI: mongodb://mongodb
+
+  mongodb:
+    image: mongo:latest
+    volumes:
+      - vue-todo-data:/data/db
+
+volumes:
+  vue-todo-data:
